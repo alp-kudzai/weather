@@ -1,5 +1,5 @@
 {
-  "proxy": "http://localhost:3001",
+  "proxy": "https://infinite-anchorage-75691.herokuapp.com/",
   "name": "client",
   "version": "0.1.0",
   "homepage": "https://alp-kudzai.github.io/weather",
