@@ -1,6 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
 import React from 'react'
+import githubIcon from './github.png'
+import emailIcon from './email.png'
+import twitterIcon from './twitter.png'
+import linkedinIcon from './linkedin.png'
+
 const defValues = {
   exclude: 'minutely',
   units: 'metric'
@@ -30,28 +35,28 @@ function convertTemp(temp){
 function convertMoon(moon){
   
   if (moon ===0 || moon === 1){
-    return 'New Moon'
+    return 'wi wi-moon-alt-new'
   }
   else if (moon > 0 && moon < 0.25){
-    return 'Waxing Crescent'
+    return 'wi wi-moon-alt-waxing-crescent-4'
   }
   else if(moon === 0.25){
-    return 'First Quarter Moon'
+    return 'wi wi-moon-alt-first-quarter'
   }
   else if (moon > 0.25 && moon < 0.5){
-    return 'Waxing Gibbous'
+    return 'wi wi-moon-alt-waxing-gibbous-4'
   }
   else if (moon === 0.5){
-    return 'Full Moon'
+    return 'wi wi-moon-alt-full'
   }
   else if (moon > 0.5 && moon < 0.75){
-    return 'Waning Gibbous'
+    return 'wi wi-moon-alt-waning-gibbous-4'
   }
   else if (moon === 0.75){
-    return 'Last Quarter Moon'
+    return 'wi wi-moon-alt-third-quarter'
   }
   else if (moon > 0.75 && moon < 1){
-    return 'Waning Crescent'
+    return 'wi wi-moon-alt-waning-crescent-4'
   }
   
 }
@@ -61,19 +66,44 @@ function convertRain(rain){
 
 function InputComponent(props){
   const {input, setInput, data, setData, getData} = props
+  function handleEnter (e){
+    if (e.key === 'Enter'){
+      getData()
+    }
+  }
+  const [time, setTime] = React.useState(new Date())
+
+  const refreshTime = () =>{
+    setTime(new Date())
+  }
+
+  React.useEffect(()=>{
+    const timeId = setInterval(refreshTime, 1000)
+    return ()=>{
+      clearInterval(timeId)
+    }
+  }, [])
   return (
     <div className='InputComponent'>
       <div className='input-square'>
-        <div className='input-wrapper'>
-          <p className='input-text'>Area</p>
-          <input className='input-box' type="text" value={input.area} onChange={(e) => setInput({...input, area: e.target.value})}/>
+        <div className='input-logo'>
+          <i className='wi wi-fog' ></i>
+          <p className='input-title'>OVERCAST</p>
         </div>
-        <div className='input-wrapper'>
-          <p className='input-text'>Code</p>
-          <input className='input-box' type="text" value={input.code} onChange={(e) => setInput({...input, code: e.target.value})}/>
+        <div className='input-inner-square'>
+          <div className='input-wrapper'>
+            <button className='button' onClick={getData}><i className="bi bi-search"></i></button>
+            <input className='input-box' type="text" placeholder='Sandton' onChange={(e) => setInput({...input, area: e.target.value})} onKeyDown={handleEnter}/>
+            <input className='iso' type="text" placeholder='ZA' onChange={(e) => setInput({...input, code: e.target.value})} onKeyDown={handleEnter}/>
+          </div>
         </div>
       </div>
-      <button className='button' onClick={getData}>Get Data</button>
+      <div className='button-wrapper'>
+        <p className='date-nav'>{new Date().toDateString()}</p>
+        
+        <p className='time-nav'>{time.toLocaleTimeString('en-ZA')}</p>
+      </div>
+      
     </div>
   )
 }
@@ -97,32 +127,40 @@ function WeatherMain(props){
   return (
     <div className='weather-main'>
       <img className='weather-main-img' alt='' src={`http://openweathermap.org/img/wn/${weather.icon}@2x.png`}/>
-      <p className='weather-main-text'>{weather.description.toUpperCase()}</p>
+      <p className='weather-main-text'>{capsFirstLetters(weather.description)}</p>
     </div>
   )
+}
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function capsFirstLetters(string){
+  if (string.includes(' ')){
+    return string.split(' ').map(word => capitalizeFirstLetter(word)).join(' ')
+  }
 }
 
 function Current(props){
   const {current} = props
   return (
     <div className='current-wrapper'>
-      <h2 className='current-title title'>Current Weather</h2>
+      <h2 className='current-head'>Current Weather</h2>
       <WeatherMain weather={current.weather[0]}/>
       <div className='current-info'>
         <div className='current-text'>
-          <p className='current-text-title'>Temperature</p>
+          <i className='wi wi-thermometer' ></i>
           <p className='current-text-value'>{convertTemp(current.temp)}°C</p>
         </div>
         <div className='current-text'>
-          <p className='current-text-title'>Humidity</p>
+          <i className='wi wi-humidity' ></i>
           <p className='current-text-value'>{current.humidity}%</p>
         </div>
         <div className='current-text'>
-          <p className='current-text-title'>Wind Speed</p>
+          <i className='wi wi-strong-wind' ></i> 
           <p className='current-text-value'>{convertWind(current.wind_speed)}km/h</p>
         </div>
         <div className='current-text'>
-          <p className='current-text-title'>Cloud Coverage</p>
+          <i className='wi wi-cloudy' ></i>
           <p className='current-text-value'>{current.clouds}%</p>
         </div>
       </div>
@@ -134,7 +172,7 @@ function Daily(props){
   const {daily} = props
   return (
     <div className='daily-wrapper'>
-      <h2 className='daily-head'>Daily Weather</h2>
+      <h2 className='daily-head'>The Week's Forecast</h2>
       <div className='daily-tiles'>
         {daily.map((day, index) => {
           return (
@@ -147,20 +185,16 @@ function Daily(props){
               </div>
               <div className='daily-tile-info'>
                 <div className='daily-info'>
-                  <p className='daily-info-text'>Temp.(min)</p>
-                  <p className='daily-info-value'>{convertTemp(day.temp.min)}°C</p>
+                  <p className='daily-info-text'><i className='wi wi-thermometer' ></i>max./min.</p>
+                  <p className='daily-info-value'>{convertTemp(day.temp.max)}°C/{convertTemp(day.temp.min)}°C</p>
                 </div>
                 <div className='daily-info'>
-                  <p className='daily-info-text'>Temp.(max)</p>
-                  <p className='daily-info-value'>{convertTemp(day.temp.max)}°C</p>
-                </div>
-                <div className='daily-info'>
-                  <p className='daily-info-text'>Rain</p>
+                  <i className='wi wi-rain' ></i>
                   <p className='daily-info-value'>{convertRain(day.pop)}%</p>
                 </div>
                 <div className='daily-info'>
                   <p className='daily-info-text'>Moon Phase</p>
-                  <p className='daily-info-value'>{convertMoon(day.moon_phase)}</p>
+                  <i className={convertMoon(day.moon_phase)} ></i>
                 </div>
               </div>
             </div>
@@ -176,7 +210,7 @@ function Hourly(props){
   const {hourly} = props
   return (
     <div className='hourly-wrapper'>
-      <h2 className='hourly-head'>Hourly Weather</h2>
+      <h2 className='hourly-head'>48hr Forecast</h2>
       <div className='hourly-tiles'>
         {hourly.map((hour, index) => {
           if (index % 3 === 0 || index === 0){
@@ -190,11 +224,11 @@ function Hourly(props){
                 </div>
                 <div className='hourly-tile-info'>
                   <div className='hourly-tile-info-temp'>
-                    <p className='hourly-tile-info-text'>Temperature</p>
+                    <i className='wi wi-thermometer' ></i>
                     <p className='hourly-tile-info-value'>{convertTemp(hour.temp)}°C</p>
                   </div>
                   <div className='hourly-tile-info-rain'>
-                    <p className='hourly-tile-info-text'>Rain</p>
+                    <i className='wi wi-rain' ></i>
                     <p className='hourly-tile-info-value'>{convertRain(hour.pop)}%</p>
                   </div>
                 </div>
@@ -207,6 +241,30 @@ function Hourly(props){
   )
 }
 
+function Footer(){
+  return (
+    <div className='footer'>
+      <p className='footer-text'>Created by <a href='https://alp-kudzai.github.io/webportfolio/'>Alp Kudzai</a></p>
+      <div id='footer-socials'>
+        <a href='https://github.com/alp-kudzai'>
+            <img className='github-icon' src={githubIcon} alt='github'/>
+        </a>
+        <a href='https://twitter.com/KudzaiAlpha'>
+          <img className='twitter-icon' src={twitterIcon} alt='' />
+        </a>
+        <a href='https://www.linkedin.com/in/kudzai-matsika-117698182/'>
+          <img className='linkedin-icon' src={linkedinIcon} alt='' />
+        </a>
+        <a href='mailto:alpha.kudzai@gmail.com'>
+          <img className='email-icon' src={emailIcon} alt='' />
+        </a>
+      </div>
+      <p>&copy; Copyright {new Date().getFullYear()}</p>
+      <p>The data used is retrived from openweathermap.org's API</p>
+    </div>
+  )
+}
+
 function App() {
   const [input, setInput] = React.useState({
     area: 'alexandra',
@@ -214,15 +272,23 @@ function App() {
   })
   const [data, setData] = React.useState(null)
 
+  const [loading, setLoading] = React.useState(false)
+
+
   const getData = () => {
-    fetch(`/api/${input.area}&${input.code}&${defValues.exclude}&${defValues.units}`)
+    setLoading(true)
+    setData(null)
+    fetch(`/api/${input.area}&${input.code.toUpperCase()}&${defValues.exclude}&${defValues.units}`)
     .then(result => result.json())
     .then(data => {
       if(Object.keys(data).includes('error')){
         alert(data.error)
+        setLoading(false)
+        setData(null)
       }
       else{
         console.log(data)
+        setLoading(false)
         setData(data)
       }
     })
@@ -230,9 +296,19 @@ function App() {
   return (
     <div className="App">
       <InputComponent input={input} setInput={setInput} data={data} setData={setData} getData={getData}/>
-      {data ? <OutputComponent data={data}/> : <div className='no-data'></div>}
+      {data ? <OutputComponent data={data}/> : <NoData loading={loading}/>}
+      <Footer/>
     </div>
   );
+}
+
+function NoData (props){
+  const {loading} = props
+  return (
+    <div id='no-data' className='no-data'>
+      {loading ? <div className='loading-spinner'><i className='wi wi-thunderstorm loading-logo'></i></div> : <div></div>}
+    </div>
+  )
 }
 
 export default App;
