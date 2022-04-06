@@ -274,14 +274,29 @@ function App() {
 
   const [loading, setLoading] = React.useState(false)
 
+  // let myInit = {
+  //   method: 'GET',
+    
+  // }
+
 
   const getData = () => {
     setLoading(true)
     setData(null)
-    fetch(`/api/${input.area}&${input.code.toUpperCase()}&${defValues.exclude}&${defValues.units}`)
-    .then(result => result.json())
+    fetch(`https://infinite-anchorage-75691.herokuapp.com/api/${input.area}&${input.code.toUpperCase()}&${defValues.exclude}&${defValues.units}`)
+    .then(result => {
+      if (!result.ok){
+        throw Error(`${result.status} ${result.statusText}`)
+      }
+      return result.json()
+    })
     .then(data => {
-      if(Object.keys(data).includes('error')){
+      if(data == null){
+        setLoading(false)
+        setData(null)
+        alert('No data found: Error')
+      }
+      else if(Object.keys(data).includes('error')){
         alert(data.error)
         setLoading(false)
         setData(null)
@@ -291,6 +306,12 @@ function App() {
         setLoading(false)
         setData(data)
       }
+    })
+    .catch(err =>{
+      console.log(err)
+      alert('An error occurred')
+      setLoading(false)
+      setData(null)
     })
   }
   return (
